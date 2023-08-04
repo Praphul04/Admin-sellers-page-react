@@ -1,24 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import ProductInfoForm from "./components/productInfoForm";
+import ProductList from "./components/productList";
+import Card from "./components/card";
+import { useEffect, useState } from "react";
 
 function App() {
+
+  const [productList,setProductList]=useState([]);
+
+  useEffect(() =>{
+    const keys=Object.keys(localStorage);
+    let storedProductList=[];
+    for(let i=0;i<keys.length;i++){
+      storedProductList=[...storedProductList,JSON.parse(localStorage.getItem(keys[i]))];
+    }
+    console.log(storedProductList);
+    setProductList(() =>{
+      return storedProductList;
+    })
+  },[]);
+
+  const onProductDataHandler=(newProductData) =>{
+    setProductList((prevProductList) =>{
+      const updatedProductData=[...prevProductList,
+        { ID: newProductData.ID,Price: newProductData.Price, Name: newProductData.Name,Category: newProductData.Category}];
+      return updatedProductData;
+  })};
+
+  const deleteBtnHandler=(btnID) =>{
+    localStorage.removeItem(btnID);
+    setProductList((prevProductList) =>{
+        const updatedProductData=prevProductList.filter((item) =>{
+          return item.ID!==btnID;
+        });
+        return updatedProductData;
+    })}
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Card className="App">
+      <ProductInfoForm onAddProductData={onProductDataHandler}/>
+      <ProductList productList={productList} deleteBtnHandler={deleteBtnHandler}/>
+    </Card>
   );
 }
 
